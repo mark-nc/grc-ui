@@ -48,7 +48,6 @@ function addAutomationToPolicy(policies, policyAutomations) {
       }
     })
   }
-  console.log(JSON.stringify(policiesCopy))
   return policiesCopy
 }
 
@@ -61,7 +60,6 @@ function AcmGrcPage(props) {
   const { policyAutomations } = data
   let { items } = data
   items = addAutomationToPolicy(items, policyAutomations)
-  console.log(JSON.stringify(items))
   if (!loading) {
     timestamp = new Date().toString()
   }
