@@ -15,11 +15,19 @@ import { getPageDefinition } from './definitions/PageDefinitions'
 
 let timestamp = new Date().toString()
 
+function build(policies, policyAutomations) {
+  let matchedPolicies = policies
+  if (Array.isArray(policyAutomations) && policyAutomations.length > 0) {
+
+  }
+  return matchedPolicies
+}
+
 function AcmGrcPage(props) {
   const allProps = {...props, ...useParams(), history: useHistory()}
   const page = getPageDefinition(allProps)
   const { loading, data={}, refetch, error, previousData } = useQuery(page.query, { variables: page.query_variables, notifyOnNetworkStatusChange: true })
-  const { items } = data
+  const { items, policyAutomations } = data
   if (!loading) {
     timestamp = new Date().toString()
   }
@@ -91,7 +99,7 @@ function AcmGrcPage(props) {
               if (loading && !previousData || items === undefined ) {
                 return <Spinner className='patternfly-spinner' />
               } else {
-                return page.children({ items })
+                return page.children({ items, policyAutomations })
               }
             })()}
           </PageSection>

@@ -184,6 +184,17 @@ export const ALL_POLICIES = gql`
       clusterNS
       clusterConsoleURL
     }
+    policyAutomations {
+      kind
+      apiVersion
+      metadata {
+        name
+        namespace
+        annotations
+        resourceVersion
+      }
+      spec
+    }
   }
 `
 // retrieve policy details for policy details drilldown
@@ -229,6 +240,17 @@ export const SINGLE_POLICY = gql`
         raw
       }
       clusterCompliant
+    }
+    policyAutomations(namespace: $namespace) {
+      kind
+      apiVersion
+      metadata {
+        name
+        namespace
+        annotations
+        resourceVersion
+      }
+      spec
     }
   }
 `

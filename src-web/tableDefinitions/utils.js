@@ -369,6 +369,7 @@ export function formatAnnotationString(policy, annotationKey){
 }
 
 export function getAutomationLink(item, locale) {
+  console.log(JSON.stringify(item))
   if (_.get(item, 'metadata.namespace')) {
     return (
       <AutomationButton item={item} locale={locale}></AutomationButton>
