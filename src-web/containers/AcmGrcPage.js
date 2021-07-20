@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 /* Copyright (c) 2021 Red Hat, Inc. */
 /* Copyright Contributors to the Open Cluster Management project */
 
@@ -6,28 +5,63 @@
 
 import React from 'react'
 import { useQuery } from '@apollo/client'
-import { AcmPageContent, AcmPageHeader, AcmAutoRefreshSelect, AcmRefreshTime, AcmSecondaryNav, AcmAlert, AcmPage } from '@open-cluster-management/ui-components'
+import {
+  AcmPageContent, AcmPageHeader, AcmAutoRefreshSelect,
+  AcmRefreshTime, AcmSecondaryNav, AcmAlert, AcmPage
+} from '@open-cluster-management/ui-components'
 import { Spinner, PageSection } from '@patternfly/react-core'
 import { useHistory, useParams } from 'react-router-dom'
 
-import { INITIAL_POLL_INTERVAL, REFRESH_INTERVALS, REFRESH_INTERVAL_COOKIE } from '../utils/constants'
+import {
+  INITIAL_POLL_INTERVAL,
+  REFRESH_INTERVALS,
+  REFRESH_INTERVAL_COOKIE
+} from '../utils/constants'
 import { getPageDefinition } from './definitions/PageDefinitions'
+import _ from 'lodash'
 
 let timestamp = new Date().toString()
 
-function build(policies, policyAutomations) {
-  let matchedPolicies = policies
+// merge policyAutomations info into policies info
+// by matching policyName + policyNS
+function addAutomationToPolicy(policies, policyAutomations) {
+  const policiesCopy = _.cloneDeep(policies)
+  const policyAutomationsMap = new Map()
   if (Array.isArray(policyAutomations) && policyAutomations.length > 0) {
-
+    policyAutomations.forEach((policyAutomation) => {
+      const policyAutomationNS = _.get(policyAutomation, 'metadata.namespace')
+      const policyName = _.get(policyAutomation, 'spec.policyRef')
+      if (policyAutomationNS && policyName) {
+        const policyAutomationsMapKey = `${policyAutomationNS}/${policyName}`
+        policyAutomationsMap.set(policyAutomationsMapKey, policyAutomation)
+      }
+    })
   }
-  return matchedPolicies
+
+  if (policyAutomationsMap.size > 0){
+    policiesCopy.forEach((policy) => {
+      const policyNS = _.get(policy, 'metadata.namespace')
+      const policyName = _.get(policy, 'metadata.name')
+      if (policyName && policyNS) {
+        const policyMapKey = `${policyNS}/${policyName}`
+        policy.policyAutomation = policyAutomationsMap.get(policyMapKey)
+      }
+    })
+  }
+  console.log(JSON.stringify(policiesCopy))
+  return policiesCopy
 }
 
 function AcmGrcPage(props) {
   const allProps = {...props, ...useParams(), history: useHistory()}
   const page = getPageDefinition(allProps)
-  const { loading, data={}, refetch, error, previousData } = useQuery(page.query, { variables: page.query_variables, notifyOnNetworkStatusChange: true })
-  const { items, policyAutomations } = data
+  const { loading, data={}, refetch, error, previousData } = useQuery(
+    page.query,
+    { variables: page.query_variables, notifyOnNetworkStatusChange: true })
+  const { policyAutomations } = data
+  let { items } = data
+  items = addAutomationToPolicy(items, policyAutomations)
+  console.log(JSON.stringify(items))
   if (!loading) {
     timestamp = new Date().toString()
   }
@@ -80,7 +114,11 @@ function AcmGrcPage(props) {
                   eMsg.push(<p key='eBodyText'>{bodyText}</p>)
                   eMsg.push(<p key='eMessage'>{message}</p>)
                   if (result.errors) {
-                    eMsg.push(<p key='eMsgDetails'>{result.errors.map((e) => e.message).join(';')}</p>)
+                    eMsg.push(
+                      <p key='eMsgDetails'>
+                        {result.errors.map((e) => e.message).join(';')}
+                      </p>
+                    )
                   }
                 // Handle Apollo graphQLErrors type
                 } else {
@@ -91,7 +129,11 @@ function AcmGrcPage(props) {
                     errorMessages = error.errors
                   }
                   eHeader = <p key='eHeader'>GraphQL Error</p>
-                  eMsg.push(<p key='eMessage'>{errorMessages.map((e) => e.message).join(';')}</p>)
+                  eMsg.push(
+                    <p key='eMessage'>{
+                      errorMessages.map((e) => e.message).join(';')}
+                    </p>
+                  )
                 }
                 return <AcmAlert isInline={true} noClose={true} variant='danger'
                   title={eHeader} subtitle={eMsg} />
@@ -99,7 +141,7 @@ function AcmGrcPage(props) {
               if (loading && !previousData || items === undefined ) {
                 return <Spinner className='patternfly-spinner' />
               } else {
-                return page.children({ items, policyAutomations })
+                return page.children({ items })
               }
             })()}
           </PageSection>
