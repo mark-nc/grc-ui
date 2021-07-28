@@ -111,8 +111,6 @@ export const transform = (items, def, locale) => {
 function pushRows(items, rows, def, locale) {
   let subUid = 0, expandable
   const refetch = items.refetch
-  console.log(typeof 996)
-  console.log(typeof refetch)
   items.forEach((item, index) => {
     expandable = false
     const rowChildObj = {}
@@ -372,7 +370,6 @@ export function formatAnnotationString(policy, annotationKey){
 }
 
 export function getAutomationLink(item, locale, refetch) {
-  console.log(typeof refetch)
   if (_.get(item, 'metadata.namespace')) {
     return (
       <AutomationButton item={item} locale={locale} refetch={refetch}></AutomationButton>
