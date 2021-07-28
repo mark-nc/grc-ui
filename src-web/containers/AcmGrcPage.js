@@ -57,11 +57,13 @@ function AcmGrcPage(props) {
   const { loading, data={}, refetch, error, previousData } = useQuery(
     page.query,
     { variables: page.query_variables, notifyOnNetworkStatusChange: true })
-  const { policyAutomations } = data
   let { items } = data
-  items = addAutomationToPolicy(items, policyAutomations)
-  if (items && refetch) {
-    items.refetch = refetch
+  if (page.id === 'policies' || page.id === 'policy-details') {
+    const { policyAutomations } = data
+    items = addAutomationToPolicy(items, policyAutomations)
+    if (items && refetch) {
+      items.refetch = refetch
+    }
   }
   if (!loading) {
     timestamp = new Date().toString()
