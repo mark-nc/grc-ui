@@ -25,18 +25,18 @@ class AutomationButton extends React.Component {
   }
 
   render() {
-    const { item, locale, userAccess } = this.props
+    const { item, locale, userAccess, refetch } = this.props
     const automationAccess = this.checkPermissions(userAccess, item.metadata.namespace)
     const policyAutomation = _.get(item, 'policyAutomation')
     if (policyAutomation) {
       const automationName = _.get(policyAutomation, 'metadata.name')
-      return this.automationLaunch(item, automationName, automationAccess, locale)
+      return this.automationLaunch(item, automationName, automationAccess, locale, refetch)
     } else {
-      return this.automationConfigure(item, automationAccess, locale)
+      return this.automationConfigure(item, automationAccess, locale, refetch)
     }
   }
 
-  automationLaunch(item, automationName, automationAccess, locale) {
+  automationLaunch(item, automationName, automationAccess, locale, refetch) {
     const label = 'automationButton'
     const onlyEdit = !automationAccess.CREATE
     const isDisabled = !automationAccess.CREATE && !automationAccess.EDIT
@@ -52,7 +52,7 @@ class AutomationButton extends React.Component {
             noTooltip={isDisabled ? true : false}
             />,
             onClick: isDisabled ? undefined : () => {
-              this.props.onClickAutomation(item, onlyEdit)
+              this.props.onClickAutomation(item, refetch, onlyEdit)
             },
             label: true,
             noIcon: true,
@@ -62,7 +62,7 @@ class AutomationButton extends React.Component {
     return createDisableTooltip(isDisabled, label, locale, configureButton)
   }
 
-  automationConfigure(item, automationAccess, locale) {
+  automationConfigure(item, automationAccess, locale, refetch) {
     const label = 'automationButton'
     const isDisabled = !automationAccess.CREATE
     const configureButton = (
@@ -72,7 +72,7 @@ class AutomationButton extends React.Component {
         className={label}
         isDisabled={isDisabled}
         onClick= {() => {
-          this.props.onClickAutomation(item)
+          this.props.onClickAutomation(item, refetch)
         }}
       >
         {msgs.get('table.actions.automation.configure', locale)}
@@ -104,6 +104,7 @@ AutomationButton.propTypes = {
   item: PropTypes.object,
   locale: PropTypes.string,
   onClickAutomation: PropTypes.func,
+  refetch: PropTypes.func,
   userAccess: PropTypes.array,
 }
 
@@ -112,7 +113,7 @@ const mapDispatchToProps = (dispatch) => {
     name: 'HCMCompliance',
   }
   return {
-    onClickAutomation: (data, onlyEdit) => {
+    onClickAutomation: (data, refetch, onlyEdit) => {
       dispatch(updateModal(
         { open: true, type: 'resource-automation', resourceTypeAuto,
           label: {
@@ -121,6 +122,7 @@ const mapDispatchToProps = (dispatch) => {
             heading: `modal.automation-${resourceTypeAuto.name.toLowerCase()}.heading`
           },
           data: { kind: resourceTypeAuto.name, ...data },
+          refetch,
           onlyEdit
         }))
     }

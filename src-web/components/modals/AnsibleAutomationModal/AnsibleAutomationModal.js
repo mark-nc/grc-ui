@@ -74,6 +74,9 @@ export class AnsibleAutomationModal extends React.Component {
       notificationOpen: true,
       openDelModal:false,
     }
+  }
+
+  componentDidMount() {
     this.initialize()
   }
 
@@ -132,14 +135,12 @@ export class AnsibleAutomationModal extends React.Component {
     const { data } = this.props
     const policyName = _.get(data, metaNameStr)
     const policyAutomation = _.get(data, 'policyAutomation')
-    console.log(JSON.stringify(policyAutomation))
     if (policyAutomation) {
       const policyAutoName = _.get(policyAutomation, metaNameStr)
       const policyAutoNS = _.get(policyAutomation, metaNSStr)
       let annotations = _.get(policyAutomation, 'metadata.annotations')
       const resourceVersion = _.get(policyAutomation, 'metadata.resourceVersion')
       const credentialName = _.get(policyAutomation, 'spec.automationDef.secret')
-      console.log(JSON.stringify(credentialName))
       const jobTemplateName = _.get(policyAutomation, 'spec.automationDef.name')
       const extraVarsJSON = _.get(policyAutomation, extraVarsStr)
       let extraVars = null
@@ -165,11 +166,9 @@ export class AnsibleAutomationModal extends React.Component {
         initialJSON
       })
     }
-    console.log(JSON.stringify(996))
     this.setState({
       initializeFinished: true,
     })
-    console.log(JSON.stringify(this.state))
   }
 
   yamlToJSON = yaml => {
@@ -266,7 +265,7 @@ export class AnsibleAutomationModal extends React.Component {
 
   handleSubmitClick = async (inputAction) => {
     const { yamlMsg, initialJSON } = this.state
-    const { locale } = this.props
+    const { locale, refetch } = this.props
     const generateJSONResult = Promise.resolve(this.generateJSON())
     const {latestJSON, action} = await generateJSONResult
     let submitAction = action
@@ -287,6 +286,7 @@ export class AnsibleAutomationModal extends React.Component {
         this.initialize()
         this.setQueryAlert(msgs.get(`ansible.${ansScheduleMode}.success`, locale), 'success')
         this.handleCloseSlideOut()
+        refetch()
       }
     }
   }
@@ -421,7 +421,6 @@ export class AnsibleAutomationModal extends React.Component {
       initializeFinished, policyAutoName, slideFlag, notificationOpen,
       credentialName, credentialIsOpen, openDelModal
     } = this.state
-    console.log(JSON.stringify(this.state))
     const policyName = _.get(policyData, metaNameStr)
     const policyNS = _.get(policyData, metaNSStr)
     let query, variables, pollInterval, actionClose
@@ -755,6 +754,7 @@ AnsibleAutomationModal.propTypes = {
   locale: PropTypes.string,
   onlyEdit: PropTypes.bool,
   open: PropTypes.bool,
+  refetch: PropTypes.func,
   type: PropTypes.string,
 }
 

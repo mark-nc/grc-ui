@@ -115,6 +115,7 @@ export class GrcView extends React.Component {
     const {
       items, activeFilters={}, location, access, history
     } = this.props
+    const refetch = items.refetch
 
     const displayType = location.pathname.split('/').pop()
     let filterGrcItems, filterToEmpty = false
@@ -143,6 +144,9 @@ export class GrcView extends React.Component {
         }
       }
       break
+    }
+    if (refetch) {
+      filterGrcItems.refetch = refetch
     }
 
     const urlParams = queryString.parse(location.search)

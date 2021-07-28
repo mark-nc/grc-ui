@@ -60,6 +60,9 @@ function AcmGrcPage(props) {
   const { policyAutomations } = data
   let { items } = data
   items = addAutomationToPolicy(items, policyAutomations)
+  if (items && refetch) {
+    items.refetch = refetch
+  }
   if (!loading) {
     timestamp = new Date().toString()
   }
