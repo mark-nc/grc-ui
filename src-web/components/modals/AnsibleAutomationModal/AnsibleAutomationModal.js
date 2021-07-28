@@ -286,6 +286,8 @@ export class AnsibleAutomationModal extends React.Component {
         this.initialize()
         this.setQueryAlert(msgs.get(`ansible.${ansScheduleMode}.success`, locale), 'success')
         this.handleCloseSlideOut()
+        // call refetch to refresh policy automation icon
+        // on all policy page / policy detail page after updating
         refetch()
       }
     }
