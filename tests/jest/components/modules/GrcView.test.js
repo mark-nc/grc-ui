@@ -20,13 +20,13 @@ import { GrcViewPolicyCluster, GrcViewPolicyCluster2,
 //curly braces means pure component without redux
 //which is what we want in unit test
 import { GrcView } from '../../../../src-web/components/modules/GrcView'
-// import renderer from 'react-test-renderer'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import configureMockStore from 'redux-mock-store'
 import { shallow } from 'enzyme'
 import toJson from 'enzyme-to-json'
 import { createMemoryHistory } from 'history'
+import _ from 'lodash'
 
 const mockStore = configureMockStore()
 const storePolicyCluster = mockStore(reduxStorePolicyCluster)
@@ -73,6 +73,8 @@ describe('GrcView component 2', () => {
     pathname: '/multicloud/policies/all'
   }
   it('shows loading when given loading:true', () => {
+    const GrcViewPolicyClusterCopy = _.cloneDeep(GrcViewPolicyCluster)
+    GrcViewPolicyClusterCopy.refech= jest.fn()
     const component = shallow(
       <Provider store={storePolicyCluster}>
         <BrowserRouter>
@@ -83,7 +85,7 @@ describe('GrcView component 2', () => {
             loading={true}
             error={null}
             activeFilters={{}}
-            items={GrcViewPolicyCluster}
+            items={GrcViewPolicyClusterCopy}
             refreshControl={GrcViewRefreshControl}
             secondaryHeaderProps={GrcViewSecondaryHeaderProps}
           />

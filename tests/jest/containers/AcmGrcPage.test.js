@@ -16,6 +16,7 @@ import * as reducers from '../../../src-web/reducers'
 import AcmGrcPage from '../../../src-web/containers/AcmGrcPage'
 import { ALL_POLICIES, POLICY_STATUS, POLICY_TEMPLATE_DETAILS, POLICY_STATUS_HISTORY } from '../../../src-web/utils/client/queries'
 import ALL_POLICIES_QUERY_DATA from './data/ALL_POLICIES_QUERY_DATA'
+import ALL_POLICIES_WITH_ATUOMATION_QUERY_DATA from './data/ALL_POLICIES_WITH_AUTOMATION_QUERY_DATA'
 import POLICY_STATUS_QUERY_DATA from './data/POLICY_STATUS_QUERY_DATA'
 import POLICY_TEMPLATE_DETAILS_QUERY_DATA from './data/POLICY_TEMPLATE_DETAILS_QUERY_DATA'
 import POLICY_STATUS_HISTORY_QUERY_DATA from './data/POLICY_STATUS_HISTORY_QUERY_DATA'
@@ -58,6 +59,32 @@ describe('AcmGrcPage container', () => {
         },
         result: {
           data: ALL_POLICIES_QUERY_DATA.data
+        },
+      },
+    ]
+    const component = mount(
+      <Provider store={store}>
+        <MockedProvider mocks={mocks} addTypename={false}>
+          <BrowserRouter>
+            <AcmGrcPage type='ALL_POLICIES' {...props} />
+          </BrowserRouter>
+        </MockedProvider>
+      </Provider>
+    )
+
+    await new Promise(resolve => setTimeout(resolve, 0))
+    component.update()
+    expect(toJson(component)).toMatchSnapshot()
+  })
+
+  it('should render ALL_POLICIES page with all policy automation ', async () => {
+    const mocks = [
+      {
+        request: {
+          query: ALL_POLICIES,
+        },
+        result: {
+          data: ALL_POLICIES_WITH_ATUOMATION_QUERY_DATA.data
         },
       },
     ]
