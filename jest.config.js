@@ -39,8 +39,8 @@ const jestConfig = {
   testEnvironment: 'jsdom',
   coverageThreshold: {
     global: {
-      branches: 50,
-      functions: 50,
+      branches: 48,
+      functions: 48,
       lines: 55,
       statements: 55,
     },

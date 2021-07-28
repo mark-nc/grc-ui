@@ -63,7 +63,7 @@ export class PolicyDetailsOverview extends React.PureComponent{
           } else if(dataResourceKey === 'clusterCompliant') {
             entry.value = getPolicyCompliantStatus({clusterCompliant: entry.value}, locale)
           } else if (keyType === 'automation') {
-            entry.value = getAutomationLink(entry.value, locale)
+            entry.value = getAutomationLink(entry.value, locale, items.refetch)
           }
         }
       }
