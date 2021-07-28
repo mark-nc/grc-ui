@@ -9,16 +9,12 @@ import { connect } from 'react-redux'
 import msgs from '../../nls/platform.properties'
 import TruncateText from '../../components/common/TruncateText'
 import { updateModal } from '../../actions/common'
-import { POLICY_AUTOMATIONS } from '../../utils/client/queries'
-import { Query } from '@apollo/client/react/components'
 import { checkCreateRole, checkEditRole } from '../../utils/CheckUserPermission'
 import {
     AcmLaunchLink
 } from '@open-cluster-management/ui-components'
-import {
-    Button,
-    Spinner,
-} from '@patternfly/react-core'
+import { Button } from '@patternfly/react-core'
+import _ from 'lodash'
 
 import '../../scss/resource-filterbar.scss'
 import { createDisableTooltip } from './DisableTooltip'
@@ -31,29 +27,13 @@ class AutomationButton extends React.Component {
   render() {
     const { item, locale, userAccess } = this.props
     const automationAccess = this.checkPermissions(userAccess, item.metadata.namespace)
-    return (
-        <Query query={POLICY_AUTOMATIONS} variables={{ namespace: item.metadata.namespace }}>
-        {( result ) => {
-          const { data={policyAutomations: []} } = result
-          const { loading } = result
-          let found = false
-          let automationName = ''
-          data.policyAutomations.forEach((automation) => {
-            if (automation.spec && automation.spec.policyRef === item.metadata.name) {
-              found = true
-              automationName = automation.metadata.name
-            }
-          })
-          if (loading) {
-            return <Spinner size='md' />
-          }
-          if (found) {
-            return this.automationLaunch(item, automationName, automationAccess, locale)
-          }
-          return this.automationConfigure(item, automationAccess, locale)
-        }}
-        </Query>
-      )
+    const policyAutomation = _.get(item, 'policyAutomation')
+    if (policyAutomation) {
+      const automationName = _.get(policyAutomation, 'metadata.name')
+      return this.automationLaunch(item, automationName, automationAccess, locale)
+    } else {
+      return this.automationConfigure(item, automationAccess, locale)
+    }
   }
 
   automationLaunch(item, automationName, automationAccess, locale) {

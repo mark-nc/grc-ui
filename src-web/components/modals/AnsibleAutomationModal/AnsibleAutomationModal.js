@@ -18,7 +18,7 @@ import MonacoEditor from 'react-monaco-editor'
 import msgs from '../../../nls/platform.properties'
 import {
   modifyPolicyAutomation, clearRequestStatus,
-  updateModal, copyAnsibleSecret, getPolicyAutomation
+  updateModal, copyAnsibleSecret
 } from '../../../actions/common'
 import { getPolicyCompliantStatus } from '../../../tableDefinitions/utils'
 import { Query } from '@apollo/client/react/components'
@@ -129,50 +129,47 @@ export class AnsibleAutomationModal extends React.Component {
   }
 
   initialize = async () => {
-    const {  data:policyData, handleGetPolicyAutomation } = this.props
-    const policyName = _.get(policyData, metaNameStr)
-    const policyNS = _.get(policyData, metaNSStr)
-    // step to check and loading exisiting policyAutomations
-    const {data:initialData} = await handleGetPolicyAutomation(policyNS)
-    const policyAutomations = initialData.policyAutomations
-    if ( Array.isArray(policyAutomations) && policyAutomations.length > 0) {
-      // targetPolicyAutomation must match policy name and ns
-      const targetPolicyAutomation = _.find(policyAutomations, ['spec.policyRef', policyName])
-      if (targetPolicyAutomation) {
-        const policyAutoName = _.get(targetPolicyAutomation, metaNameStr)
-        const policyAutoNS = _.get(targetPolicyAutomation, metaNSStr)
-        let annotations = _.get(targetPolicyAutomation, 'metadata.annotations')
-        const resourceVersion = _.get(targetPolicyAutomation, 'metadata.resourceVersion')
-        const credentialName = _.get(targetPolicyAutomation, 'spec.automationDef.secret')
-        const jobTemplateName = _.get(targetPolicyAutomation, 'spec.automationDef.name')
-        const extraVarsJSON = _.get(targetPolicyAutomation, extraVarsStr)
-        let extraVars = null
-        if (typeof extraVarsJSON === 'object' && Object.keys(extraVarsJSON).length > 0) {
-          extraVars = this.jsonToYAML(extraVarsJSON)
-        }
-        let ansScheduleMode = _.get(targetPolicyAutomation, 'spec.mode')
-        if (annotations && annotations['policy.open-cluster-management.io/rerun'] === 'true') {
-          ansScheduleMode = 'manual'
-        } else {
-          annotations = {'policy.open-cluster-management.io/rerun':'false'}
-        }
-        const initialJSON = this.buildPolicyAutomationJSON({
-          policyAutoName, policyAutoNS, policyName, annotations, resourceVersion,
-          extraVars, credentialName, jobTemplateName, ansScheduleMode
-        })
-        this.setState({
-          policyAutoName,
-          credentialName,
-          jobTemplateName,
-          extraVars,
-          ansScheduleMode,
-          initialJSON
-        })
+    const { data } = this.props
+    const policyName = _.get(data, metaNameStr)
+    const policyAutomation = _.get(data, 'policyAutomation')
+    console.log(JSON.stringify(policyAutomation))
+    if (policyAutomation) {
+      const policyAutoName = _.get(policyAutomation, metaNameStr)
+      const policyAutoNS = _.get(policyAutomation, metaNSStr)
+      let annotations = _.get(policyAutomation, 'metadata.annotations')
+      const resourceVersion = _.get(policyAutomation, 'metadata.resourceVersion')
+      const credentialName = _.get(policyAutomation, 'spec.automationDef.secret')
+      console.log(JSON.stringify(credentialName))
+      const jobTemplateName = _.get(policyAutomation, 'spec.automationDef.name')
+      const extraVarsJSON = _.get(policyAutomation, extraVarsStr)
+      let extraVars = null
+      if (typeof extraVarsJSON === 'object' && Object.keys(extraVarsJSON).length > 0) {
+        extraVars = this.jsonToYAML(extraVarsJSON)
       }
+      let ansScheduleMode = _.get(policyAutomation, 'spec.mode')
+      if (annotations && annotations['policy.open-cluster-management.io/rerun'] === 'true') {
+        ansScheduleMode = 'manual'
+      } else {
+        annotations = {'policy.open-cluster-management.io/rerun':'false'}
+      }
+      const initialJSON = this.buildPolicyAutomationJSON({
+        policyAutoName, policyAutoNS, policyName, annotations, resourceVersion,
+        extraVars, credentialName, jobTemplateName, ansScheduleMode
+      })
+      this.setState({
+        policyAutoName,
+        credentialName,
+        jobTemplateName,
+        extraVars,
+        ansScheduleMode,
+        initialJSON
+      })
     }
+    console.log(JSON.stringify(996))
     this.setState({
       initializeFinished: true,
     })
+    console.log(JSON.stringify(this.state))
   }
 
   yamlToJSON = yaml => {
@@ -424,6 +421,7 @@ export class AnsibleAutomationModal extends React.Component {
       initializeFinished, policyAutoName, slideFlag, notificationOpen,
       credentialName, credentialIsOpen, openDelModal
     } = this.state
+    console.log(JSON.stringify(this.state))
     const policyName = _.get(policyData, metaNameStr)
     const policyNS = _.get(policyData, metaNSStr)
     let query, variables, pollInterval, actionClose
@@ -753,7 +751,6 @@ AnsibleAutomationModal.propTypes = {
   data: PropTypes.object,
   handleClose: PropTypes.func,
   handleCopyAnsibleSecret: PropTypes.func,
-  handleGetPolicyAutomation: PropTypes.func,
   handleModifyPolicyAutomation: PropTypes.func,
   locale: PropTypes.string,
   onlyEdit: PropTypes.bool,
@@ -774,9 +771,7 @@ const mapDispatchToProps = (dispatch) => {
     handleModifyPolicyAutomation: (poliyAutomationJSON, action) =>
       dispatch(modifyPolicyAutomation(poliyAutomationJSON, action)),
     handleCopyAnsibleSecret: (name, namespace, targetNamespace) =>
-      dispatch(copyAnsibleSecret(name, namespace, targetNamespace)),
-    handleGetPolicyAutomation: (namespace) =>
-      dispatch(getPolicyAutomation(namespace)),
+      dispatch(copyAnsibleSecret(name, namespace, targetNamespace))
   }
 }
 
